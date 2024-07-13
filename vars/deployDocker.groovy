@@ -1,4 +1,5 @@
 def call(Map config = [:]) {
+    // Extracting configuration parameters with default values
     def image = config.get('image', 'my-default-image')
     def registry = config.get('registry', 'my-default-registry')
     def tag = config.get('tag', 'latest')

@@ -24,6 +24,7 @@ pipeline {
                 echo "Clean workspace successfully"
             }
         }
+
         stage('Git clone') {
             steps {
                 echo "Cloning repository from GitLab"
@@ -33,6 +34,7 @@ pipeline {
                 echo "Git clone stage completed"
             }
         }
+
         stage('Check and Remove Running Container') {
             steps {
                 script {
@@ -45,10 +47,10 @@ pipeline {
                     } else {
                         echo "No container is running on port ${HOST_PORT}."
                     }
-
                 }
             }
         }
+
         stage('Build and Push Docker Image') {
             steps {
                 script {
@@ -58,7 +60,6 @@ pipeline {
                         tag: env.TAG,
                         credentialsId: env.CREDENTIALS_ID
                     )
-
                 }
             }
         }
@@ -77,12 +78,12 @@ pipeline {
                 }
             }
         }
+
         stage('Clean Up Docker Images') {
             steps {
                 echo "Removing dangling Docker images."
                 sh 'docker rmi $(docker images -f "dangling=true" -q) || true'
             }
         }
-
     }
 }

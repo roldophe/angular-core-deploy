@@ -18,25 +18,40 @@ pipeline {
 
     stages {
 
+        // stage('Clean workspace') {
+        //     steps {
+        //         cleanWs()
+        //         // sendMessageToTelegram("Clean workspace successfully")
+        //     }
+        // }
         stage('Clean workspace') {
             steps {
                 cleanWs()
-                // sendMessageToTelegram("Clean workspace successfully")
+                echo "Clean workspace successfully"
             }
         }
         stage('Git clone') {
             steps {
                 echo "Cloning repository from GitLab"
-                withCredentials([string(credentialsId: env.GIT_CREDENTIALS_ID, variable: 'GIT_TOKEN')]) { 
-                    sh '''
-                        git clone https://$GIT_TOKEN@${GitRepoURL} .
-                    '''
-                }
+                git branch: 'main', credentialsId: 'git-token', url: 'https://gitlab.com/frontend1954503/web/angular/core_angular.git'
                 sh 'ls -lrt'
                 sh 'pwd'
-                // sendMessageToTelegram("Git clone stage completed")
+                echo "Git clone stage completed"
             }
         }
+        // stage('Git clone') {
+        //     steps {
+        //         echo "Cloning repository from GitLab"
+        //         withCredentials([string(credentialsId: env.GIT_CREDENTIALS_ID, variable: 'GIT_TOKEN')]) { 
+        //             sh '''
+        //                 git clone https://$GIT_TOKEN@${GitRepoURL} .
+        //             '''
+        //         }
+        //         sh 'ls -lrt'
+        //         sh 'pwd'
+        //         // sendMessageToTelegram("Git clone stage completed")
+        //     }
+        // }
         // Un-comment the following stages when needed
         /*
         stage('Build Docker Image') {

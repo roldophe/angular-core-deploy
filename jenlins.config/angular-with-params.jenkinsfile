@@ -1,12 +1,31 @@
 @Library('angular-core-deploy@main') _
+
 pipeline {
     agent any
 
-    parameters {
-        string(name: 'BUILD_NUMBER', defaultValue: '1', description: 'Build number for the image tag')
-        string(name: 'GIT_CREDENTIALS_ID', defaultValue: 'git-token', description: 'Credentials ID for Git')
-        string(name: 'HOST_PORT', defaultValue: '4200', description: 'Host port for the container')
-        string(name: 'API_URL', defaultValue: 'http://54.169.114.36:8080/', description: 'API URL for environment.ts')
+    properties([
+        parameters([
+            string(name: 'REGISTRY', defaultValue: 'radomkhoem', description: 'Docker Registry Name'),
+            string(name: 'IMAGE', defaultValue: 'angular-core', description: 'Image Name'),
+            string(name: 'TAG', defaultValue: '$BUILD_NUMBER', description: 'Tag for the Docker Image'),
+            string(name: 'CONTAINER_PORT', defaultValue: '80', description: 'Container Port'),
+            string(name: 'HOST_PORT', defaultValue: '4200', description: 'Host Port'),
+            string(name: 'API_URL', defaultValue: 'http://54.169.114.36:8080/', description: 'API URL')
+        ])
+    ])
+
+    environment {
+        chat_id = '1053418999'
+        REGISTRY = params.REGISTRY
+        IMAGE = params.IMAGE
+        TAG = params.TAG
+        CREDENTIALS_ID = 'docker-hub'
+        GitRepoURL = "https://gitlab.com/frontend1954503/web/angular/core_angular.git"
+        GIT_CREDENTIALS_ID = 'git-token'
+        CONTAINER_NAME = "${params.IMAGE}-${params.TAG}"
+        CONTAINER_PORT = params.CONTAINER_PORT
+        HOST_PORT = params.HOST_PORT
+        API_URL = params.API_URL
     }
 
     stages {
@@ -20,7 +39,7 @@ pipeline {
         stage('Git clone') {
             steps {
                 echo "Cloning repository from GitLab"
-                git branch: 'main', credentialsId: "${params.GIT_CREDENTIALS_ID}", url: "https://gitlab.com/frontend1954503/web/angular/core_angular.git"
+                git branch: 'main', credentialsId: "${GIT_CREDENTIALS_ID}", url: "${GitRepoURL}"
                 sh 'ls -lrt'
                 sh 'pwd'
                 echo "Git clone stage completed"
@@ -30,22 +49,27 @@ pipeline {
         stage('Update environment.ts') {
             steps {
                 script {
-                    writeFile file: 'update-env.sh', text: '''
-                    #!/bin/bash
-                    ENV_FILE="src/environments/environment.ts"
-                    if [ -f "$ENV_FILE" ]; then
-                      echo "Updating environment.ts file with API_URL=${API_URL}"
-                      sed -i "s|const url = .*|const url = '${API_URL}';|g" "$ENV_FILE"
-                      echo "Updated environment.ts file:"
-                      cat "$ENV_FILE"
-                    else
-                      echo "Environment file not found: $ENV_FILE"
-                      exit 1
-                    fi
-                    '''
-                    
-                    sh 'chmod +x update-env.sh'
-                    sh './update-env.sh'
+                    if (env.API_URL != params.API_URL) {
+                        // Create update-env.sh file
+                        writeFile file: 'update-env.sh', text: '''#!/bin/bash
+                        ENV_FILE="src/environments/environment.ts"
+                        if [ -f "$ENV_FILE" ]; then
+                          echo "Updating environment.ts file with API_URL=${API_URL}"
+                          sed -i "s|const url = .*|const url = '${API_URL}';|g" "$ENV_FILE"
+                          echo "Updated environment.ts file:"
+                          cat "$ENV_FILE"
+                        else
+                          echo "Environment file not found: $ENV_FILE"
+                          exit 1
+                        fi
+                        '''
+
+                        // Make the script executable
+                        sh 'chmod +x update-env.sh'
+
+                        // Run the script to update environment.ts
+                        sh './update-env.sh'
+                    }
                 }
             }
         }

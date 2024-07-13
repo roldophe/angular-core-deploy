@@ -1,4 +1,4 @@
-// @Library(['jenkinslib']) _
+@Library(['angular-core-deploy']) _
 
 pipeline {
     agent any

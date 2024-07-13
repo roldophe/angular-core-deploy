@@ -1,3 +1,5 @@
+@Library('angular-core-deploy@main') _
+
 pipeline {
     agent any
 
@@ -12,10 +14,10 @@ pipeline {
         CONTAINER_NAME = "${IMAGE}-${TAG}"
         CONTAINER_PORT = "80"
         HOST_PORT = "4200"
-        API_URL = "http://54.169.114.36:8080/"
     }
 
     stages {
+
         stage('Clean workspace') {
             steps {
                 cleanWs()
@@ -30,32 +32,6 @@ pipeline {
                 sh 'ls -lrt'
                 sh 'pwd'
                 echo "Git clone stage completed"
-            }
-        }
-
-        stage('Update environment.ts') {
-            steps {
-                script {
-                    // Create update-env.sh file
-                    writeFile file: 'update-env.sh', text: '''#!/bin/bash
-                    ENV_FILE="src/environments/environment.ts"
-                    if [ -f "$ENV_FILE" ]; then
-                      echo "Updating environment.ts file with API_URL=${API_URL}"
-                      sed -i "s|const url = .*|const url = '${API_URL}';|g" "$ENV_FILE"
-                      echo "Updated environment.ts file:"
-                      cat "$ENV_FILE"
-                    else
-                      echo "Environment file not found: $ENV_FILE"
-                      exit 1
-                    fi
-                    '''
-                    
-                    // Make the script executable
-                    sh 'chmod +x update-env.sh'
-                    
-                    // Run the script to update environment.ts
-                    sh './update-env.sh'
-                }
             }
         }
 

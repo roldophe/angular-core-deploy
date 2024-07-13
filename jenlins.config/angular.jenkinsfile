@@ -12,7 +12,7 @@ pipeline {
         GitRepoURL = "https://gitlab.com/frontend1954503/web/angular/core_angular.git"
         GIT_CREDENTIALS_ID = 'git-token'
         CONTAINER_NAME = "${IMAGE}-${TAG}"
-        CONTAINER_PORT = "4200"
+        CONTAINER_PORT = "80"
         HOST_PORT = "4200"
     }
 

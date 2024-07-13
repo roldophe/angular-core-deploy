@@ -21,7 +21,7 @@ pipeline {
         stage('Clean workspace') {
             steps {
                 cleanWs()
-                sendMessageToTelegram("Clean workspace successfully")
+                // sendMessageToTelegram("Clean workspace successfully")
             }
         }
         stage('Git clone') {
@@ -34,7 +34,7 @@ pipeline {
                 }
                 sh 'ls -lrt'
                 sh 'pwd'
-                sendMessageToTelegram("Git clone stage completed")
+                // sendMessageToTelegram("Git clone stage completed")
             }
         }
         // stage('Build Docker Image') {

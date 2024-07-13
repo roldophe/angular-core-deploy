@@ -20,7 +20,7 @@ RUN npm run build
 FROM nginx:alpine
 
 # Copy the build output from the first stage to Nginx
-COPY --from=app /usr/src/app/dist/core_admin /usr/share/nginx/html
+COPY --from=app /usr/src/app/* /usr/share/nginx/html
 
 # List copied files for verification (optional)
 RUN ls /usr/share/nginx/html

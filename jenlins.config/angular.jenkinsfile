@@ -1,4 +1,4 @@
-// @Library(['angular-core-deploy']) _
+@Library('angular-core-deploy') _
 
 pipeline {
     agent any
@@ -9,7 +9,7 @@ pipeline {
         IMAGE = 'angular-core'
         TAG = "${BUILD_NUMBER}"
         CREDENTIALS_ID = 'docker-hub'
-        GitRepoURL = "git@gitlab.com:frontend1954503/web/angular/core_angular.git"
+        GitRepoURL = "gitlab.com/frontend1954503/web/angular/core_angular.git"
         GIT_CREDENTIALS_ID = 'git-token'
         CONTAINER_NAME = "${IMAGE}-${TAG}"
         CONTAINER_PORT = "80"
@@ -21,15 +21,15 @@ pipeline {
         stage('Clean workspace') {
             steps {
                 cleanWs()
-                sendMessageToTelegram(" Clean worksapce Successfully ")
+                sendMessageToTelegram("Clean workspace successfully")
             }
         }
         stage('Git clone') {
             steps {
-                echo "Cloning repository from GitHub"
+                echo "Cloning repository from GitLab"
                 withCredentials([string(credentialsId: env.GIT_CREDENTIALS_ID, variable: 'GIT_TOKEN')]) { 
                     sh '''
-                        git clone https://$GIT_TOKEN@$GitRepoURL .
+                        git clone https://$GIT_TOKEN@${GitRepoURL} .
                     '''
                 }
                 sh 'ls -lrt'
@@ -37,7 +37,34 @@ pipeline {
                 sendMessageToTelegram("Git clone stage completed")
             }
         }
+        // stage('Build Docker Image') {
+        //     steps {
+        //         script {
+        //             docker.build("${REGISTRY}/${IMAGE}:${TAG}")
+        //         }
+        //         sendMessageToTelegram("Docker build stage completed")
+        //     }
+        // }
+        // stage('Push Docker Image') {
+        //     steps {
+        //         withCredentials([usernamePassword(credentialsId: env.CREDENTIALS_ID, usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASSWORD')]) {
+        //             script {
+        //                 docker.withRegistry('https://index.docker.io/v1/', "${CREDENTIALS_ID}") {
+        //                     docker.image("${REGISTRY}/${IMAGE}:${TAG}").push()
+        //                 }
+        //             }
+        //         }
+        //         sendMessageToTelegram("Docker push stage completed")
+        //     }
+        // }
+        // stage('Deploy Docker Container') {
+        //     steps {
+        //         sh '''
+        //             docker run -d --name ${CONTAINER_NAME} -p ${HOST_PORT}:${CONTAINER_PORT} ${REGISTRY}/${IMAGE}:${TAG}
+        //         '''
+        //         sendMessageToTelegram("Docker container deployed successfully")
+        //     }
+        // }
 
     }
 }
-

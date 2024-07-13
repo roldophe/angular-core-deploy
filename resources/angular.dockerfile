@@ -16,7 +16,7 @@ COPY . .
 # Stage 2: Serve the Angular application with Nginx
 FROM nginx:alpine
 
-COPY --from=app /usr/src/app/dist/my-angular-project/browser /usr/share/nginx/html
+COPY --from=app /usr/src/app/dist/angular-core/browser /usr/share/nginx/html
 
 RUN ls /usr/share/nginx/html
 

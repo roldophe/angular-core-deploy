@@ -59,7 +59,7 @@ pipeline {
                         tag: env.TAG,
                         credentialsId: env.CREDENTIALS_ID
                     )
-                    sendMessageToTelegram("Build and Push Docker Image Successfully") 
+
                 }
             }
         }

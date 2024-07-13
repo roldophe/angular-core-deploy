@@ -1,0 +1,113 @@
+pipeline {
+    agent any
+
+    environment {
+        chat_id = '1053418999'
+        REGISTRY = 'radomkhoem'
+        IMAGE = 'angular-core'
+        TAG = "${BUILD_NUMBER}"
+        CREDENTIALS_ID = 'docker-hub'
+        GitRepoURL = "https://gitlab.com/frontend1954503/web/angular/core_angular.git"
+        GIT_CREDENTIALS_ID = 'git-token'
+        CONTAINER_NAME = "${IMAGE}-${TAG}"
+        CONTAINER_PORT = "80"
+        HOST_PORT = "4200"
+        API_URL = "http://54.169.114.36:8080/"
+    }
+
+    stages {
+        stage('Clean workspace') {
+            steps {
+                cleanWs()
+                echo "Clean workspace successfully"
+            }
+        }
+
+        stage('Git clone') {
+            steps {
+                echo "Cloning repository from GitLab"
+                git branch: 'main', credentialsId: "${GIT_CREDENTIALS_ID}", url: "${GitRepoURL}"
+                sh 'ls -lrt'
+                sh 'pwd'
+                echo "Git clone stage completed"
+            }
+        }
+
+        stage('Update environment.ts') {
+            steps {
+                script {
+                    // Create update-env.sh file
+                    writeFile file: 'update-env.sh', text: '''#!/bin/bash
+                    ENV_FILE="src/environments/environment.ts"
+                    if [ -f "$ENV_FILE" ]; then
+                      echo "Updating environment.ts file with API_URL=${API_URL}"
+                      sed -i "s|const url = .*|const url = '${API_URL}';|g" "$ENV_FILE"
+                      echo "Updated environment.ts file:"
+                      cat "$ENV_FILE"
+                    else
+                      echo "Environment file not found: $ENV_FILE"
+                      exit 1
+                    fi
+                    '''
+                    
+                    // Make the script executable
+                    sh 'chmod +x update-env.sh'
+                    
+                    // Run the script to update environment.ts
+                    sh './update-env.sh'
+                }
+            }
+        }
+
+        stage('Check and Remove Running Container') {
+            steps {
+                script {
+                    def runningContainerId = sh(script: "docker ps -q --filter 'publish=${HOST_PORT}'", returnStdout: true).trim()
+
+                    if (runningContainerId) {
+                        echo "Stopping and removing the existing container with ID: ${runningContainerId}."
+                        sh "docker stop ${runningContainerId}"
+                        sh "docker rm ${runningContainerId}"
+                    } else {
+                        echo "No container is running on port ${HOST_PORT}."
+                    }
+                }
+            }
+        }
+
+        stage('Build and Push Docker Image') {
+            steps {
+                script {
+                    angularBuildAndPush(
+                        image: env.IMAGE,
+                        registry: env.REGISTRY,
+                        tag: env.TAG,
+                        credentialsId: env.CREDENTIALS_ID
+                    )
+                }
+            }
+        }
+
+        stage('Deploy Docker Container') {
+            steps {
+                script {
+                    deployDocker(
+                        image: env.IMAGE,
+                        registry: env.REGISTRY,
+                        tag: env.TAG,
+                        containerPort: env.CONTAINER_PORT,
+                        hostPort: env.HOST_PORT,
+                        containerName: env.CONTAINER_NAME
+                    )
+                }
+            }
+        }
+
+        stage('Clean Up Docker Images') {
+            steps {
+                echo "Removing dangling Docker images."
+                sh 'docker rmi $(docker images -f "dangling=true" -q) || true'
+            }
+        }
+    }
+}

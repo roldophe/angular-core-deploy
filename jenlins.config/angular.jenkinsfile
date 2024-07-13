@@ -78,8 +78,12 @@ pipeline {
         stage('Build and Push Docker Image') {
             steps {
                 script {
-                    sh 'chmod +x autopush.sh'
-                    sh './autopush.sh'
+                    angularBuildAndPush(
+                        image: env.IMAGE,
+                        registry: env.REGISTRY,
+                        tag: env.TAG,
+                        credentialsId: env.CREDENTIALS_ID
+                    )
                 }
             }
         }

@@ -3,39 +3,36 @@
 pipeline {
     agent any
 
-    properties([
-        parameters([
-            string(name: 'REGISTRY', defaultValue: 'radomkhoem', description: 'Docker Registry Name'),
-            string(name: 'IMAGE', defaultValue: 'angular-core', description: 'Image Name'),
-            string(name: 'TAG', defaultValue: '$BUILD_NUMBER', description: 'Tag for the Docker Image'),
-            string(name: 'CONTAINER_PORT', defaultValue: '80', description: 'Container Port'),
-            string(name: 'HOST_PORT', defaultValue: '4200', description: 'Host Port'),
-            string(name: 'API_URL', defaultValue: 'http://54.169.114.36:8080/', description: 'API URL')
-        ])
+    parameters([
+        string(name: 'REGISTRY', defaultValue: 'radomkhoem', description: 'Docker Registry Name'),
+        string(name: 'IMAGE', defaultValue: 'angular-core', description: 'Image Name'),
+        string(name: 'TAG', defaultValue: '$BUILD_NUMBER', description: 'Tag for the Docker Image'),
+        string(name: 'CONTAINER_PORT', defaultValue: '80', description: 'Container Port'),
+        string(name: 'HOST_PORT', defaultValue: '4200', description: 'Host Port'),
+        string(name: 'API_URL', defaultValue: 'http://54.169.114.36:8080/', description: 'API URL')
     ])
 
     environment {
         chat_id = '1053418999'
-        REGISTRY = params.REGISTRY
-        IMAGE = params.IMAGE
-        TAG = params.TAG
         CREDENTIALS_ID = 'docker-hub'
         GitRepoURL = "https://gitlab.com/frontend1954503/web/angular/core_angular.git"
         GIT_CREDENTIALS_ID = 'git-token'
-        CONTAINER_NAME = "${params.IMAGE}-${params.TAG}"
-        CONTAINER_PORT = params.CONTAINER_PORT
-        HOST_PORT = params.HOST_PORT
-        API_URL = params.API_URL
     }
 
     stages {
+        stage('Set Environment Variables') {
+            steps {
+                withEnv(["REGISTRY=${params.REGISTRY}", "IMAGE=${params.IMAGE}", "TAG=${params.TAG}", "CONTAINER_PORT=${params.CONTAINER_PORT}", "HOST_PORT=${params.HOST_PORT}", "API_URL=${params.API_URL}"]) {
+                    // Your pipeline stages go here
+                }
+            }
+        }
         stage('Clean workspace') {
             steps {
                 cleanWs()
                 echo "Clean workspace successfully"
             }
         }
-
         stage('Git clone') {
             steps {
                 echo "Cloning repository from GitLab"

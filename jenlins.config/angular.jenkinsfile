@@ -1,4 +1,4 @@
-@Library(['angular-core-deploy']) _
+// @Library(['angular-core-deploy']) _
 
 pipeline {
     agent any

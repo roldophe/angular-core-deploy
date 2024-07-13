@@ -50,6 +50,19 @@ pipeline {
                 }
             }
         }
+        stage('Build and Push Docker Image') {
+            steps {
+                script {
+                    angularBuildAndPush(
+                        image: env.IMAGE,
+                        registry: env.REGISTRY,
+                        tag: env.TAG,
+                        credentialsId: env.CREDENTIALS_ID
+                    )
+                    sendMessageToTelegram("Build and Push Docker Image Successfully") 
+                }
+            }
+        }
 
     }
 }

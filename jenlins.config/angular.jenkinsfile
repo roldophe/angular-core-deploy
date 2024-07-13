@@ -36,7 +36,6 @@ pipeline {
         stage('Check and Remove Running Container') {
             steps {
                 script {
-                    // Check if a container is running on the HOST_PORT and stop/remove it if exists
                     def runningContainerId = sh(script: "docker ps -q --filter 'publish=${HOST_PORT}'", returnStdout: true).trim()
 
                     if (runningContainerId) {

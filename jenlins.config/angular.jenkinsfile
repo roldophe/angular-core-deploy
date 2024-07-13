@@ -33,6 +33,23 @@ pipeline {
                 echo "Git clone stage completed"
             }
         }
+        stage('Check and Remove Running Container') {
+            steps {
+                script {
+                    // Check if a container is running on the HOST_PORT and stop/remove it if exists
+                    def runningContainerId = sh(script: "docker ps -q --filter 'publish=${HOST_PORT}'", returnStdout: true).trim()
+
+                    if (runningContainerId) {
+                        echo "Stopping and removing the existing container with ID: ${runningContainerId}."
+                        sh "docker stop ${runningContainerId}"
+                        sh "docker rm ${runningContainerId}"
+                    } else {
+                        echo "No container is running on port ${HOST_PORT}."
+                    }
+
+                }
+            }
+        }
 
     }
 }

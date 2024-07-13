@@ -6,7 +6,7 @@ pipeline {
     environment {
         chat_id = '1053418999'
         REGISTRY = 'radomkhoem'
-        IMAGE = 'medical-clinic'
+        IMAGE = 'angular-core'
         TAG = "${BUILD_NUMBER}"
         CREDENTIALS_ID = 'docker-hub'
         GitRepoURL = "git@gitlab.com:frontend1954503/web/angular/core_angular.git"
